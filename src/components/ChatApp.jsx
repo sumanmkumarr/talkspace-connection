@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import Header from './Header';
 import LoginForm from './LoginForm';
 import ChatInterface from './ChatInterface';
