@@ -4,12 +4,17 @@ import { io } from 'socket.io-client';
 let socket;
 
 export const initiateSocket = (userId, username) => {
-  // For development, connecting to localhost
-  socket = io('http://localhost:5000', {
+  // Determine server URL based on environment
+  // In production, we'll connect to the same domain
+  const serverUrl = import.meta.env.PROD 
+    ? window.location.origin // Use same domain as the app in production
+    : 'http://localhost:5000'; // Use localhost for development
+  
+  socket = io(serverUrl, {
     query: { userId, username }
   });
   
-  console.log('Connecting socket...');
+  console.log('Connecting socket to:', serverUrl);
   
   socket.on('connect', () => {
     console.log('Socket connected!');
