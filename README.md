@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/2d70a82e-6687-4dfc-a41a-7c16cc71b547
+**URL**: https://talkspace-connection.lovable.app/
 
 ## How can I edit this code?
 
