@@ -15,6 +15,14 @@ export const initiateSocket = (userId, username) => {
     console.log('Socket connected!');
   });
   
+  socket.on('user-joined', (user) => {
+    console.log('User joined:', user);
+  });
+
+  socket.on('user-left', (user) => {
+    console.log('User left:', user);
+  });
+  
   return socket;
 };
 

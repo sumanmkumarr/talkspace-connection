@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import { subscribeToChat, sendMessage } from '../utils/socket';
+import { subscribeToChat, sendMessage, getSocket } from '../utils/socket';
 
 const ChatInterface = ({ userId, username }) => {
   const [messages, setMessages] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
     // Subscribe to incoming messages
@@ -22,9 +24,49 @@ const ChatInterface = ({ userId, username }) => {
     };
     setMessages([welcomeMsg]);
 
+    // Listen for user joined events
+    const socket = getSocket();
+    if (socket) {
+      socket.on('user-joined', (user) => {
+        const joinMsg = {
+          userId: 'system',
+          username: 'System',
+          text: `${user.username} has joined the chat`,
+          timestamp: new Date().toISOString()
+        };
+        setMessages(prev => [...prev, joinMsg]);
+        toast.info(`${user.username} has joined`);
+        
+        // Update online users
+        setOnlineUsers(prev => [...prev, user]);
+      });
+
+      socket.on('user-left', (user) => {
+        const leaveMsg = {
+          userId: 'system',
+          username: 'System',
+          text: `${user.username} has left the chat`,
+          timestamp: new Date().toISOString()
+        };
+        setMessages(prev => [...prev, leaveMsg]);
+        toast.info(`${user.username} has left`);
+        
+        // Update online users
+        setOnlineUsers(prev => prev.filter(u => u.userId !== user.userId));
+      });
+      
+      socket.on('online-users', (users) => {
+        setOnlineUsers(users);
+      });
+    }
+
     // Cleanup on unmount
     return () => {
-      // This will be handled by the parent component
+      if (socket) {
+        socket.off('user-joined');
+        socket.off('user-left');
+        socket.off('online-users');
+      }
     };
   }, [username]);
 
@@ -35,9 +77,6 @@ const ChatInterface = ({ userId, username }) => {
       text,
       timestamp: new Date().toISOString()
     };
-    
-    // Add message to local state immediately for responsiveness
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
     
     // Send to server
     sendMessage(newMessage);
@@ -50,6 +89,11 @@ const ChatInterface = ({ userId, username }) => {
         <p className="text-sm text-gray-500">
           {messages.length > 1 ? `${messages.length - 1} messages` : 'No messages yet'}
         </p>
+        {onlineUsers.length > 0 && (
+          <div className="mt-1 text-xs text-gray-500">
+            {onlineUsers.length} user{onlineUsers.length !== 1 ? 's' : ''} online
+          </div>
+        )}
       </div>
       
       <MessageList 
