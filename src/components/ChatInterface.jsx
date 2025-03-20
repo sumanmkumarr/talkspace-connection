@@ -10,8 +10,11 @@ const ChatInterface = ({ userId, username }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
+    console.log('ChatInterface mounted, subscribing to chat');
+    
     // Subscribe to incoming messages
     subscribeToChat((msg) => {
+      console.log('Message received in ChatInterface:', msg);
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
@@ -62,7 +65,10 @@ const ChatInterface = ({ userId, username }) => {
 
     // Cleanup on unmount
     return () => {
+      console.log('ChatInterface unmounting, cleaning up listeners');
+      const socket = getSocket();
       if (socket) {
+        socket.off('message');
         socket.off('user-joined');
         socket.off('user-left');
         socket.off('online-users');
@@ -71,6 +77,7 @@ const ChatInterface = ({ userId, username }) => {
   }, [username]);
 
   const handleSendMessage = (text) => {
+    console.log('Handling send message:', text);
     const newMessage = {
       userId,
       username,
@@ -80,6 +87,11 @@ const ChatInterface = ({ userId, username }) => {
     
     // Send to server
     sendMessage(newMessage);
+    
+    // Also add to local messages immediately for a more responsive feel
+    // This will be replaced when the server echoes it back
+    console.log('Adding message locally:', newMessage);
+    setMessages(prev => [...prev, newMessage]);
   };
 
   return (

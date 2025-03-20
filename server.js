@@ -48,6 +48,7 @@ io.on('connection', (socket) => {
   
   // Handle messages
   socket.on('message', (message) => {
+    console.log(`Received message from ${username}:`, message);
     // Broadcast message to all clients (including sender)
     io.emit('message', message);
   });

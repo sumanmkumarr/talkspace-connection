@@ -37,17 +37,27 @@ export const disconnectSocket = () => {
 };
 
 export const subscribeToChat = (callback) => {
-  if (!socket) return;
+  if (!socket) {
+    console.error('Socket not initialized. Cannot subscribe to chat.');
+    return;
+  }
+  
+  // Remove any existing listeners to prevent duplicates
+  socket.off('message');
   
   socket.on('message', msg => {
-    console.log('Message received:', msg);
+    console.log('Message received from server:', msg);
     callback(msg);
   });
 };
 
 export const sendMessage = (message) => {
-  if (!socket) return;
+  if (!socket) {
+    console.error('Socket not initialized. Cannot send message.');
+    return;
+  }
   
+  console.log('Sending message to server:', message);
   socket.emit('message', message);
 };
 
